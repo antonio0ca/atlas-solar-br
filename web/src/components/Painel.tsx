@@ -18,7 +18,8 @@ export function Painel({ dados, modo, setModo, tresD, setTresD, selecionado, onS
   // Estatísticas nacionais (demo ou reais — sempre derivadas dos dados carregados).
   const stats = useMemo(() => {
     const potTotal = feats.reduce((s, p) => s + p.pot_instalada_mw, 0);
-    const gtiMax = feats.reduce((a, p) => (p.gti_anual > a.gti_anual ? p : a), feats[0]);
+    const comGti = feats.filter((p) => p.gti_anual != null);
+    const gtiMax = comGti.reduce((a, p) => (p.gti_anual > a.gti_anual ? p : a), comGti[0]);
     return { potTotal, gtiMax };
   }, [feats]);
 

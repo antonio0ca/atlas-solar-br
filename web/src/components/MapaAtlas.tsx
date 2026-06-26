@@ -94,11 +94,11 @@ export function MapaAtlas({ dados, modo, tresD, selecionado, onSelecionar }: Pro
           <dl>
             <div>
               <dt>Recurso (GTI)</dt>
-              <dd>{hover.p.gti_anual.toFixed(2)} kWh/m²·dia</dd>
+              <dd>{hover.p.gti_anual != null ? `${hover.p.gti_anual.toFixed(2)} kWh/m²·dia` : "—"}</dd>
             </div>
             <div>
               <dt>Uso (per capita)</dt>
-              <dd>{hover.p.w_per_capita.toFixed(0)} W/hab</dd>
+              <dd>{hover.p.w_per_capita != null ? `${hover.p.w_per_capita.toFixed(0)} W/hab` : "—"}</dd>
             </div>
             <div>
               <dt>Potência instalada</dt>
