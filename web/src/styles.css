@@ -96,11 +96,11 @@ body {
   padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--line);
 }
 .masthead h1 {
-  font-family: "Playfair Display", serif; font-weight: 600;
-  font-size: clamp(1.7rem, 4.5vw, 2.1rem); line-height: 1.08; letter-spacing: -0.4px;
+  font-family: "Inter", system-ui, sans-serif; font-weight: 700;
+  font-size: clamp(1.7rem, 4.5vw, 2.1rem); line-height: 1.12; letter-spacing: -0.5px;
   margin: 12px 0 12px;
 }
-.masthead h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+.masthead h1 em { font-style: normal; font-weight: 700; color: var(--accent); }
 .lede { color: var(--muted); font-size: 0.92rem; line-height: 1.55; }
 
 /* Botão fantasma */
@@ -123,10 +123,9 @@ body {
 .seg-btn:hover { border-color: var(--ink); }
 .seg-btn.ativo { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
-/* Descrição do modo — serifa itálica */
+/* Descrição do modo */
 .note-desc {
-  font-family: "Playfair Display", serif; font-style: italic; font-size: 1.02rem;
-  line-height: 1.5; color: var(--ink); margin-bottom: 16px;
+  font-size: 0.92rem; line-height: 1.55; color: var(--muted); margin-bottom: 16px;
 }
 
 /* Legenda */
@@ -142,10 +141,9 @@ body {
 /* Achado — pull-quote */
 .achado { margin: 0 0 26px; padding-left: 18px; border-left: 2px solid var(--accent); }
 .achado p {
-  font-family: "Playfair Display", serif; font-style: italic; font-size: 1.06rem; line-height: 1.5;
-  color: var(--ink); margin-top: 10px;
+  font-size: 0.98rem; line-height: 1.55; color: var(--ink); margin-top: 10px;
 }
-.achado em { font-weight: 600; font-style: italic; color: var(--accent); }
+.achado em { font-weight: 600; font-style: normal; color: var(--accent); }
 
 /* Ranking — tabela */
 .ranking { margin-bottom: 28px; }
