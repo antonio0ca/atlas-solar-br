@@ -104,14 +104,23 @@ jupyter lab notebooks/01_ingestao.ipynb
 cd web
 npm install
 npm run dev        # http://localhost:5173
-
-# Regerar o GeoJSON que o mapa consome (a partir da raiz do projeto):
-python scripts/montar_dados_web.py --demo
 ```
 
-> Hoje a vitrine roda com **dados de demonstração** por UF (claramente sinalizado
-> na interface). Ao concluir o pipeline (M1/M2), o mesmo frontend passa a consumir
-> o GeoJSON **municipal real** — sem mudar o código do mapa. Deploy: Vercel (preset Vite, raiz `web/`).
+A vitrine consome `web/public/data/atlas_municipios.geojson` (5.563 municípios,
+**dados reais**). Para regerá-lo a partir das fontes (rodar na raiz do projeto):
+
+```bash
+pip install shapely numpy requests          # sem geopandas — junção via shapely
+bash   scripts/construir_geometria.sh        # malha municipal simplificada (~2 MB)
+python scripts/processar_aneel.py            # potência FV por município (ANEEL ~122 MB)
+python scripts/processar_inpe.py             # GTI por município (junção espacial INPE)
+python scripts/processar_populacao.py        # população (API IBGE)
+python scripts/montar_dados_web.py --real     # monta atlas_municipios.geojson
+```
+
+> O frontend é **agnóstico ao nível**: se `atlas_municipios.geojson` não existir,
+> ele cai para `atlas_uf.geojson` (demo por UF, sinalizado na interface).
+> Deploy: Vercel (preset Vite, raiz `web/`).
 
 ---
 
@@ -140,24 +149,33 @@ Estratégia adotada (documentada no notebook):
 
 ---
 
-## 📊 Achados (em construção)
+## 📊 Achados (primeira leitura — dados reais)
 
-> _Esta seção será preenchida com 3–4 achados + mapas após a EDA e o cruzamento._
+Números do pipeline atual (INPE GTI + ANEEL GD + IBGE, jun/2026):
 
-1. **Mapa do recurso** — coroplético de GTI por estado/município (onde o sol é mais forte).
-2. **Sazonalidade** — variação mensal de GTI por região (a estabilidade do Nordeste).
-3. **Mapa do uso** — potência FV per capita (onde os painéis estão de fato).
-4. **Desertos de aproveitamento** — o cruzamento: muito recurso × pouco uso.
+1. **Recurso (GTI).** A irradiação no plano inclinado varia de **3,9 a 6,1 kWh/m²·dia**.
+   O topo está no **semiárido (PB, PI, BA, MG-norte)** com ~6,0; o vale, no
+   **Sul/litoral e Amazônia** (3,9–4,5), por nebulosidade.
+2. **Uso real.** ~**49,7 GW** de FV distribuída instalada, **concentrada em S/SE/CO**
+   (MG, SP, RS, PR, SC) — puxada por renda e tarifa, não por irradiação.
+3. **Desertos de aproveitamento.** **671 municípios** combinam recurso no terço
+   superior e uso no terço inferior. Os extremos (ex.: **São José de Caiana/PB**,
+   **Morro Cabeça no Tempo/PI**, **Cônego Marinho/MG**) têm GTI ~6,0 e **30–50 W/hab**.
+4. **O contraste capital × interior.** Mesmo capitais ensolaradas têm baixo per capita
+   por causa da população (ex.: **São Paulo** com GTI 4,6 e só **19 W/hab**).
+
+> ⚠️ Leitura preliminar a partir dos agregados. A EDA aprofundada (sazonalidade por
+> região, controle por renda) está no roadmap (M1/M2).
 
 ---
 
 ## 🗂️ Roadmap
 
 - [x] **Scaffold + ingestão** — baixar as 3 fontes e casá-las por código IBGE.
-- [x] **Vitrine React** — mapa interativo (deck.gl + MapLibre) rodando com dados demo por UF.
-- [ ] **EDA + mapas de recurso** — coroplético de irradiação, sazonalidade, ranking.
-- [ ] **Cruzamento (o insight)** — GTI × potência per capita; índice de oportunidade.
-- [ ] **Dados reais na vitrine** — trocar o GeoJSON demo pelo municipal do pipeline.
+- [x] **Vitrine React** — mapa interativo (deck.gl + MapLibre).
+- [x] **Dados reais na vitrine** — 5.563 municípios (INPE GTI + ANEEL + IBGE), via shapely.
+- [ ] **EDA + mapas de recurso** — sazonalidade por região, ranking, controle por renda.
+- [ ] **Cruzamento aprofundado** — correlação recurso/uso × renda (hipótese H4).
 - [ ] **Storytelling** — pergunta → método → achados → conclusão, com mapas.
 - [ ] **Deploy** — publicar a vitrine na Vercel e linkar no topo do README.
 
