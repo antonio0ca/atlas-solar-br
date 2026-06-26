@@ -6,8 +6,11 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { type AtlasFC, type AtlasFeature, type AtlasProps, type Modo, corDaFeature } from "../lib/atlas";
 
-// Basemap dark gratuito (CARTO), sem necessidade de token.
-const BASEMAP = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+// Basemaps CARTO gratuitos (sem token), acompanhando o tema da identidade.
+const BASEMAP = {
+  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+};
 
 const VISAO_INICIAL = {
   longitude: -54,
@@ -28,12 +31,14 @@ interface Props {
   dados: AtlasFC;
   modo: Modo;
   tresD: boolean;
+  tema: "light" | "dark";
   selecionado: string | null;
   onSelecionar: (code: string | null) => void;
 }
 
-export function MapaAtlas({ dados, modo, tresD, selecionado, onSelecionar }: Props) {
+export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar }: Props) {
   const [hover, setHover] = useState<{ x: number; y: number; p: AtlasProps } | null>(null);
+  const corLinha: [number, number, number] = tema === "light" ? [120, 113, 108] : [40, 42, 50];
 
   const layer = useMemo(
     () =>
@@ -51,8 +56,8 @@ export function MapaAtlas({ dados, modo, tresD, selecionado, onSelecionar }: Pro
           return [c[0], c[1], c[2], sel ? 255 : 205];
         },
         getLineColor: (f: AtlasFeature) =>
-          selecionado === f.properties.code ? [255, 255, 255, 255] : [10, 12, 20, 160],
-        getLineWidth: (f: AtlasFeature) => (selecionado === f.properties.code ? 2.2 : 0.6),
+          selecionado === f.properties.code ? [13, 148, 136, 255] : [...corLinha, 150],
+        getLineWidth: (f: AtlasFeature) => (selecionado === f.properties.code ? 2.2 : 0.5),
         lineWidthUnits: "pixels",
         // Em 3D, a altura representa o uso (potência per capita) — colunas mais altas = mais instalação.
         getElevation: (f: AtlasFeature) => f.properties.w_per_capita * 120,
@@ -68,19 +73,19 @@ export function MapaAtlas({ dados, modo, tresD, selecionado, onSelecionar }: Pro
           onSelecionar(info.object ? (info.object as AtlasFeature).properties.code : null),
         updateTriggers: {
           getFillColor: [modo, selecionado],
-          getLineColor: [selecionado],
+          getLineColor: [selecionado, tema],
           getLineWidth: [selecionado],
         },
         transitions: { getFillColor: 250, getElevation: 400 },
       }),
-    [dados, modo, tresD, selecionado, onSelecionar]
+    [dados, modo, tresD, tema, corLinha, selecionado, onSelecionar]
   );
 
   return (
     <div className="mapa-wrap">
       <Map
         initialViewState={{ ...VISAO_INICIAL, pitch: tresD ? 45 : 0 }}
-        mapStyle={BASEMAP}
+        mapStyle={BASEMAP[tema]}
         attributionControl={false}
       >
         <DeckOverlay layers={[layer]} interleaved />

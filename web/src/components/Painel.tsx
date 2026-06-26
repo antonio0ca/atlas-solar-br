@@ -7,11 +7,13 @@ interface Props {
   setModo: (m: Modo) => void;
   tresD: boolean;
   setTresD: (v: boolean) => void;
+  tema: "light" | "dark";
+  setTema: (t: "light" | "dark") => void;
   selecionado: string | null;
   onSelecionar: (code: string | null) => void;
 }
 
-export function Painel({ dados, modo, setModo, tresD, setTresD, selecionado, onSelecionar }: Props) {
+export function Painel({ dados, modo, setModo, tresD, setTresD, tema, setTema, selecionado, onSelecionar }: Props) {
   const cfg = MODOS.find((m) => m.id === modo)!;
   const feats = dados.features.map((f) => f.properties);
 
@@ -41,6 +43,13 @@ export function Painel({ dados, modo, setModo, tresD, setTresD, selecionado, onS
           <h1>Atlas de Potencial Solar do Brasil</h1>
           <p className="sub">Recurso disponível × aproveitamento real</p>
         </div>
+        <button
+          className="ghost-btn"
+          onClick={() => setTema(tema === "light" ? "dark" : "light")}
+          title="Alternar tema claro/escuro"
+        >
+          Tema
+        </button>
       </header>
 
       <p className="pergunta">

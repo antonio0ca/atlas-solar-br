@@ -3,12 +3,19 @@ import { MapaAtlas } from "./components/MapaAtlas";
 import { Painel } from "./components/Painel";
 import { type AtlasFC, type Modo } from "./lib/atlas";
 
+type Tema = "light" | "dark";
+
 export default function App() {
   const [dados, setDados] = useState<AtlasFC | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [modo, setModo] = useState<Modo>("recurso");
   const [tresD, setTresD] = useState(false);
   const [selecionado, setSelecionado] = useState<string | null>(null);
+  const [tema, setTema] = useState<Tema>("light");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = tema;
+  }, [tema]);
 
   useEffect(() => {
     // Carrega o nível municipal se existir; senão cai para o estadual (demo).
@@ -32,6 +39,7 @@ export default function App() {
         dados={dados}
         modo={modo}
         tresD={tresD}
+        tema={tema}
         selecionado={selecionado}
         onSelecionar={setSelecionado}
       />
@@ -41,6 +49,8 @@ export default function App() {
         setModo={setModo}
         tresD={tresD}
         setTresD={setTresD}
+        tema={tema}
+        setTema={setTema}
         selecionado={selecionado}
         onSelecionar={setSelecionado}
       />
