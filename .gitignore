@@ -1,0 +1,40 @@
+# ─────────────────────────────────────────────────────────────
+# Dados — NUNCA versionar os dados brutos/processados.
+# A base do INPE/LABREN não pode ser redistribuída (uso não comercial
+# + exigência de citação). O código baixa e processa; os dados ficam locais.
+# Mantemos apenas os .gitkeep para preservar a estrutura de pastas.
+# ─────────────────────────────────────────────────────────────
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Saídas pesadas (mapas HTML/PNG). Mantemos a pasta, ignoramos o conteúdo.
+# Comente as linhas abaixo se quiser versionar figuras leves para o README.
+outputs/figuras/*
+outputs/mapas/*
+!outputs/figuras/.gitkeep
+!outputs/mapas/.gitkeep
+
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+
+# ── Jupyter ─────────────────────────────────────────────────
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# ── Ferramentas / IDE ───────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.env
+.cache/

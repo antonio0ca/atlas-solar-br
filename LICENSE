@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2026 Antonio Carvalho
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+NOTA SOBRE OS DADOS (não cobertos por esta licença)
+================================================================================
+
+A licença MIT acima aplica-se APENAS ao código-fonte deste repositório.
+
+Os DADOS consumidos pelo projeto têm licenças próprias e NÃO são redistribuídos
+aqui (ver .gitignore):
+
+- Atlas Brasileiro de Energia Solar — 2ª ed. (2017)
+  LABREN/CCST/INPE. Uso não comercial e mediante citação da fonte.
+  A base NÃO pode ser redistribuída. O código apenas baixa e processa.
+  Fonte: https://labren.ccst.inpe.br/atlas_2017.html
+
+- Relação de Empreendimentos de Geração Distribuída
+  ANEEL — Portal de Dados Abertos (dados públicos).
+  Fonte: https://dadosabertos.aneel.gov.br/
+
+- Malhas Territoriais (municípios/estados)
+  IBGE — dados públicos. Fonte: https://www.ibge.gov.br/geociencias/
+
+Ao usar este projeto, você é responsável por respeitar os termos de cada fonte.
