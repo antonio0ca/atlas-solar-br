@@ -62,19 +62,23 @@ export const CORES_CLASSE: Record<string, RGB> = {
   "sem dado": [40, 44, 56],
 };
 
-// Domínios das rampas (ajustados aos dados; recalcular ao trocar de fonte).
-const DOM_RECURSO: [number, number] = [4.7, 6.0];
+// Domínios das rampas (calibrados aos dados reais; p5–p95 do GTI municipal).
+const DOM_RECURSO: [number, number] = [4.4, 6.0];
+// Uso: log10(W/hab) — distribuição muito assimétrica (mediana ~250, cauda até ~9700).
+const DOM_USO_LOG: [number, number] = [1.3, 3.48]; // ~20 a ~3000 W/hab
 
 function norm(v: number, [lo, hi]: [number, number]): number {
   return (v - lo) / (hi - lo);
 }
 
 export function corDaFeature(p: AtlasProps, modo: Modo): RGB {
-  if (modo === "recurso") return rampa(RAMPA_SOL, norm(p.gti_anual, DOM_RECURSO));
+  if (modo === "recurso") {
+    if (p.gti_anual == null) return CORES_CLASSE["sem dado"];
+    return rampa(RAMPA_SOL, norm(p.gti_anual, DOM_RECURSO));
+  }
   if (modo === "uso") {
-    // Escala log: a distribuição de W/hab é muito assimétrica.
-    const t = norm(Math.log10(p.w_per_capita + 1), [0, Math.log10(2500)]);
-    return rampa(RAMPA_USO, t);
+    if (p.w_per_capita == null) return CORES_CLASSE["sem dado"];
+    return rampa(RAMPA_USO, norm(Math.log10(p.w_per_capita + 1), DOM_USO_LOG));
   }
   return CORES_CLASSE[p.classe_oportunidade] ?? CORES_CLASSE["sem dado"];
 }
@@ -100,7 +104,7 @@ export const MODOS: ConfigModo[] = [
       { cor: rampa(RAMPA_SOL, 1), rotulo: "Mais sol (≈6,0)" },
       { cor: rampa(RAMPA_SOL, 0.66), rotulo: "" },
       { cor: rampa(RAMPA_SOL, 0.33), rotulo: "" },
-      { cor: rampa(RAMPA_SOL, 0), rotulo: "Menos sol (≈4,7)" },
+      { cor: rampa(RAMPA_SOL, 0), rotulo: "Menos sol (≈4,4)" },
     ],
   },
   {
