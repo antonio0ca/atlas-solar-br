@@ -76,7 +76,7 @@ ANEEL_COL_UF = "SigUF"
 ANEEL_COL_MUN = "NomMunicipio"
 ANEEL_COL_TIPO_GERACAO = "SigTipoGeracao"    # 'UFV' = solar fotovoltaica
 ANEEL_COL_FONTE = "DscFonteGeracao"          # 'Radiação solar'
-ANEEL_COL_POTENCIA = "MdaPotenciaInstaladakW"  # atenção: 'k' minúsculo
+ANEEL_COL_POTENCIA = "MdaPotenciaInstaladaKW"  # nome real no CSV (o dicionário PDF traz 'kW')
 ANEEL_COL_LAT = "NumCoordNEmpreendimento"
 ANEEL_COL_LON = "NumCoordEEmpreendimento"
 
