@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Map, { useControl, NavigationControl } from "react-map-gl/maplibre";
 import { MapboxOverlay, type MapboxOverlayProps } from "@deck.gl/mapbox";
 import { GeoJsonLayer } from "@deck.gl/layers";
@@ -11,6 +11,17 @@ const BASEMAP = {
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
 };
+
+// Busca o JSON do estilo uma vez por tema e cacheia. Passar o OBJETO completo
+// (em vez da URL) evita que o react-map-gl faça diff contra um estilo ainda
+// vazio durante o carregamento — origem dos erros de validação do maplibre.
+const _cacheEstilo: Record<string, any> = {};
+async function carregarEstilo(tema: "light" | "dark"): Promise<any> {
+  if (!_cacheEstilo[tema]) {
+    _cacheEstilo[tema] = await fetch(BASEMAP[tema]).then((r) => r.json());
+  }
+  return _cacheEstilo[tema];
+}
 
 const VISAO_INICIAL = {
   longitude: -54,
@@ -38,7 +49,16 @@ interface Props {
 
 export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar }: Props) {
   const [hover, setHover] = useState<{ x: number; y: number; p: AtlasProps } | null>(null);
+  const [estilo, setEstilo] = useState<any>(null);
   const corLinha: [number, number, number] = tema === "light" ? [120, 113, 108] : [40, 42, 50];
+
+  useEffect(() => {
+    let vivo = true;
+    carregarEstilo(tema).then((s) => vivo && setEstilo(s));
+    return () => {
+      vivo = false;
+    };
+  }, [tema]);
 
   const layer = useMemo(
     () =>
@@ -83,14 +103,17 @@ export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar 
 
   return (
     <div className="mapa-wrap">
+      {estilo && (
       <Map
+        key={tema}
         initialViewState={{ ...VISAO_INICIAL, pitch: tresD ? 45 : 0 }}
-        mapStyle={BASEMAP[tema]}
+        mapStyle={estilo}
         attributionControl={false}
       >
         <DeckOverlay layers={[layer]} interleaved />
         <NavigationControl position="bottom-right" showCompass={false} />
       </Map>
+      )}
 
       {hover && (
         <div className="tooltip" style={{ left: hover.x + 14, top: hover.y + 14 }}>
