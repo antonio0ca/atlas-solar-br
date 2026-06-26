@@ -1,0 +1,29 @@
+# Atlas de Potencial Solar do Brasil — dependências
+# Python 3.11+ recomendado. Instale com:  pip install -r requirements.txt
+
+# Núcleo de dados
+pandas>=2.2
+numpy>=1.26
+
+# Geoespacial
+geopandas>=1.0          # GeoDataFrames, junção espacial
+shapely>=2.0            # geometrias (pontos da grade INPE)
+geobr>=0.2.2            # malhas oficiais do IBGE (municípios/estados) em Python
+pyogrio>=0.9            # I/O vetorial rápido (engine do GeoPandas)
+
+# Download / utilidades
+requests>=2.31
+tqdm>=4.66              # barra de progresso nos downloads
+
+# Visualização
+folium>=0.16           # mapas interativos (coropléticos)
+plotly>=5.22           # gráficos e mapas alternativos
+matplotlib>=3.8        # figuras estáticas para o README
+mapclassify>=2.6       # esquemas de classificação p/ coropléticos (quantis etc.)
+
+# App navegável (opcional — deploy no Streamlit Community Cloud)
+streamlit>=1.36
+
+# Notebook
+jupyter>=1.0
+ipykernel>=6.29
