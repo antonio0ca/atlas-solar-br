@@ -105,9 +105,99 @@ def montar_demo() -> None:
     print("Desertos de aproveitamento (demo):", ", ".join(sorted(desertos)))
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Modo REAL — nível municipal, a partir dos insumos processados.
+# ─────────────────────────────────────────────────────────────────────────────
+INTERIM = ROOT / "data" / "interim"
+RAW_UF_GEO = ROOT / "data" / "raw" / "brazil-states.geojson"
+OUT_MUN = ROOT / "web" / "public" / "data" / "atlas_municipios.geojson"
+
+
+def _mapa_uf_por_codigo() -> dict[str, str]:
+    """Código IBGE do estado (2 díg.) -> sigla da UF, a partir da malha estadual."""
+    geo = json.loads(RAW_UF_GEO.read_text(encoding="utf-8"))
+    return {str(f["properties"]["codigo_ibg"]): f["properties"]["sigla"] for f in geo["features"]}
+
+
+def _percentil_array(valores):
+    import numpy as np
+    a = np.asarray(valores, dtype=float)
+    ordem = a.argsort()
+    rank = np.empty_like(ordem, dtype=float)
+    rank[ordem] = (np.arange(len(a)) + 1) / len(a)
+    return rank
+
+
+def montar_real() -> None:
+    import numpy as np
+
+    geo = json.loads((INTERIM / "mun_simpl.geojson").read_text(encoding="utf-8"))
+    gti = json.loads((INTERIM / "gti_por_municipio.json").read_text(encoding="utf-8"))
+    aneel = json.loads((INTERIM / "aneel_por_municipio.json").read_text(encoding="utf-8"))
+    pop = json.loads((INTERIM / "populacao.json").read_text(encoding="utf-8"))
+    uf_por_cod = _mapa_uf_por_codigo()
+
+    # Monta linhas com valores; calcula W/hab onde houver população.
+    linhas = []
+    for f in geo["features"]:
+        if not f.get("geometry"):
+            continue
+        code = str(f["properties"]["code"])
+        pot_kw = aneel.get(code, {}).get("pot_kw", 0.0)
+        habit = pop.get(code)
+        wpc = (pot_kw * 1000.0) / habit if habit else None  # W/hab
+        linhas.append({
+            "f": f, "code": code,
+            "name": f["properties"]["nome"],
+            "uf": aneel.get(code, {}).get("uf") or uf_por_cod.get(code[:2], ""),
+            "gti": gti.get(code),
+            "pot_mw": pot_kw / 1000.0,
+            "wpc": wpc,
+        })
+
+    # Percentis nacionais (só entre municípios com recurso e uso definidos).
+    validos = [r for r in linhas if r["gti"] is not None and r["wpc"] is not None]
+    pr = dict(zip([r["code"] for r in validos], _percentil_array([r["gti"] for r in validos])))
+    pu = dict(zip([r["code"] for r in validos], _percentil_array([r["wpc"] for r in validos])))
+
+    feats = []
+    for r in linhas:
+        p_rec = pr.get(r["code"])
+        p_uso = pu.get(r["code"])
+        tem = p_rec is not None and p_uso is not None
+        score = round(float(p_rec - p_uso), 3) if tem else None
+        feats.append({
+            "type": "Feature",
+            "properties": {
+                "code": r["code"], "name": r["name"], "uf": r["uf"], "level": "mun",
+                "gti_anual": round(r["gti"], 2) if r["gti"] is not None else None,
+                "pot_instalada_mw": round(r["pot_mw"], 2),
+                "w_per_capita": round(r["wpc"], 1) if r["wpc"] is not None else None,
+                "score_oportunidade": score,
+                "classe_oportunidade": _classe(p_rec or 0, p_uso or 0, tem),
+            },
+            "geometry": r["f"]["geometry"],
+        })
+
+    out = {"type": "FeatureCollection", "meta": {
+        "fonte": "LABREN/CCST/INPE (GTI) · ANEEL (GD fotovoltaica) · IBGE (malha/população)",
+        "nivel": "mun"}, "features": feats}
+    OUT_MUN.parent.mkdir(parents=True, exist_ok=True)
+    OUT_MUN.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
+
+    mb = OUT_MUN.stat().st_size / 1e6
+    desertos = sum(1 for f in feats if f["properties"]["classe_oportunidade"] == "deserto de aproveitamento")
+    pot_total = sum(f["properties"]["pot_instalada_mw"] for f in feats) / 1000
+    print(f"OK: {OUT_MUN.relative_to(ROOT)} ({len(feats):,} municípios, {mb:.1f} MB)")
+    print(f"   {pot_total:,.1f} GW FV · {desertos:,} desertos de aproveitamento")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--demo", action="store_true", help="gera atlas_uf.geojson com valores demo")
+    ap.add_argument("--demo", action="store_true", help="gera atlas_uf.geojson (valores demo)")
+    ap.add_argument("--real", action="store_true", help="gera atlas_municipios.geojson (dados reais)")
     args = ap.parse_args()
-    # Por ora só o modo demo está implementado; o modo municipal entra no M1/M2.
-    montar_demo()
+    if args.real:
+        montar_real()
+    else:
+        montar_demo()
