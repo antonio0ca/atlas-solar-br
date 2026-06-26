@@ -11,9 +11,10 @@ Projeto de **análise de dados geoespacial** que cruza duas camadas para revelar
 O contraste entre as duas é a narrativa central: **regiões com muito sol e pouca
 instalação são "desertos de aproveitamento"** — alto potencial, baixo uso.
 
-> 🗺️ **Vitrine interativa (React + deck.gl):** mapa dark navegável com modos
-> _Recurso_ / _Uso_ / _Oportunidade_, visão 3D e realce dos desertos.
-> Código em [`web/`](web/). _(link da demo na Vercel — em breve)_
+> 🗺️ **Vitrine interativa (React + deck.gl):** mapa navegável com modos
+> _Recurso_ / _Uso_ / _Oportunidade_, visão 3D, tema **claro/escuro** (basemap
+> acompanha) e realce dos desertos. Identidade editorial — Playfair Display + Inter +
+> JetBrains Mono, acento teal. Código em [`web/`](web/). _(link da demo na Vercel — em breve)_
 
 ---
 
