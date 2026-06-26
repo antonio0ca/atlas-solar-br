@@ -36,30 +36,31 @@ function rampa(stops: RGB[], t: number): RGB {
   return [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
 }
 
-// Rampa "sol" (recurso): roxo profundo -> laranja -> amarelo quente.
+// Paleta alinhada à identidade do Visualizador (teal/âmbar/índigo/verde).
+// Rampa "sol" (recurso): creme -> âmbar -> terracota (YlOrRd quente).
 const RAMPA_SOL: RGB[] = [
-  [38, 24, 74],
-  [122, 40, 80],
-  [214, 96, 41],
-  [245, 169, 41],
-  [255, 226, 120],
+  [255, 230, 168],
+  [251, 195, 77],
+  [245, 158, 11],
+  [224, 112, 26],
+  [181, 71, 27],
 ];
-// Rampa "uso" (ciano -> verde -> branco-azulado).
+// Rampa "uso" (teal sequencial, ancorada no acento #0D9488).
 const RAMPA_USO: RGB[] = [
-  [12, 34, 56],
-  [16, 92, 120],
-  [29, 161, 152],
-  [120, 220, 180],
-  [224, 255, 236],
+  [214, 240, 234],
+  [134, 208, 190],
+  [47, 182, 154],
+  [13, 148, 136],
+  [11, 110, 102],
 ];
 
-// Cores categóricas do modo oportunidade (a narrativa).
+// Cores categóricas do modo oportunidade (a narrativa) — palette do Visualizador.
 export const CORES_CLASSE: Record<string, RGB> = {
-  "deserto de aproveitamento": [244, 63, 94], // realce: muito sol, pouco uso
-  "recurso e uso altos": [250, 204, 21],
-  "uso acima do recurso": [56, 189, 248],
-  intermediário: [71, 85, 105],
-  "sem dado": [40, 44, 56],
+  "deserto de aproveitamento": [245, 158, 11], // âmbar (compare): muito sol, pouco uso
+  "recurso e uso altos": [16, 185, 129], // verde (sorted)
+  "uso acima do recurso": [99, 102, 241], // índigo (pivot)
+  intermediário: [120, 113, 108], // stone
+  "sem dado": [168, 162, 158],
 };
 
 // Domínios das rampas (calibrados aos dados reais; p5–p95 do GTI municipal).
