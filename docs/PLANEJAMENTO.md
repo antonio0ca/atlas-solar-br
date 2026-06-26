@@ -38,12 +38,42 @@ domínio geoespacial (junção espacial, agregação por polígono), rigor de in
 
 ---
 
+## 2.1 Arquitetura — motor (Python) + vitrine (React)
+
+O entregável de portfólio é uma **SPA visual**; o Python é o motor que a alimenta.
+
+```
+[ Motor — Python ]                         [ Vitrine — React/Vite ]
+INPE + ANEEL + IBGE                        web/ (MapLibre GL + deck.gl)
+  ─ ingestão (src/)                          ─ mapa dark interativo
+  ─ junção espacial + cruzamento             ─ modos Recurso/Uso/Oportunidade
+  ─ índice de oportunidade                   ─ visão 3D (altura = uso)
+        │                                    ─ painel + ranking de desertos
+        ▼  scripts/montar_dados_web.py               ▲
+   web/public/data/atlas_*.geojson  ───────────────┘  (fetch)
+```
+
+**Contrato de dados** (propriedades de cada feature, iguais em UF e município):
+`code, name, uf, level, gti_anual, pot_instalada_mw, w_per_capita,
+score_oportunidade, classe_oportunidade`. O frontend é **agnóstico ao nível** —
+trocar `atlas_uf.geojson` (demo) por `atlas_municipios.geojson` (real) não muda o código do mapa.
+
+**Stack da vitrine:** React 18 + Vite + TypeScript, MapLibre GL (basemap CARTO dark,
+sem token), deck.gl (`GeoJsonLayer`, extrusão 3D). Deploy: Vercel (preset Vite, raiz `web/`).
+
+---
+
 ## 3. Fases e entregáveis (milestones)
 
 ### ✅ M0 — Scaffold + Ingestão  *(concluído)*
 Estrutura do repo, módulos `src/`, notebook `01_ingestao.ipynb`, casamento
 IBGE×ANEEL×INPE, tabela `processed/atlas_municipios.parquet`.
 - **Entregável:** pipeline reprodutível de ingestão.
+
+### ✅ M0.5 — Vitrine React (base)  *(concluído)*
+SPA com mapa dark interativo (deck.gl + MapLibre), 3 modos, visão 3D, painel com
+ranking de desertos, rodando com dados demo por UF.
+- **Entregável:** `web/` funcional (`npm run dev`), build passando.
 
 ### 🔜 M1 — EDA + mapas de recurso
 Explorar a grade INPE e mapear o recurso.

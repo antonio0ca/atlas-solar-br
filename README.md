@@ -11,6 +11,10 @@ Projeto de **análise de dados geoespacial** que cruza duas camadas para revelar
 O contraste entre as duas é a narrativa central: **regiões com muito sol e pouca
 instalação são "desertos de aproveitamento"** — alto potencial, baixo uso.
 
+> 🗺️ **Vitrine interativa (React + deck.gl):** mapa dark navegável com modos
+> _Recurso_ / _Uso_ / _Oportunidade_, visão 3D e realce dos desertos.
+> Código em [`web/`](web/). _(link da demo na Vercel — em breve)_
+
 ---
 
 ## 🧭 A pergunta de negócio
@@ -60,13 +64,20 @@ atlas-solar-br/
 │   └── processed/        # tabela final município × recurso × uso
 ├── notebooks/
 │   └── 01_ingestao.ipynb # ingestão + casamento IBGE × ANEEL × INPE (passo a passo)
-├── src/                  # funções reutilizáveis
+├── src/                  # motor de dados (Python)
 │   ├── config.py         # caminhos, URLs e nomes de colunas das fontes
 │   ├── download.py       # download + descompactação
 │   ├── ingest_inpe.py    # grade de irradiação -> pontos
 │   ├── ingest_aneel.py   # potência FV instalada por município
 │   ├── ingest_ibge.py    # malhas e população
 │   └── aggregate.py      # junção espacial + cruzamento + índice de oportunidade
+├── scripts/
+│   └── montar_dados_web.py  # gera o GeoJSON que a vitrine consome
+├── web/                  # vitrine (React + Vite + TS + MapLibre + deck.gl)
+│   ├── src/components/   # MapaAtlas (mapa) · Painel (controles/legenda)
+│   ├── src/lib/atlas.ts  # tipos, métricas e escalas de cor
+│   └── public/data/      # atlas_uf.geojson (servido ao mapa)
+├── docs/PLANEJAMENTO.md  # planejamento completo (milestones, riscos, DoD)
 ├── outputs/              # mapas e figuras geradas (gitignored)
 ├── README.md · requirements.txt · .gitignore · LICENSE
 ```
@@ -86,6 +97,21 @@ jupyter lab notebooks/01_ingestao.ipynb
 
 > O primeiro download da ANEEL tem ~122 MB; o do INPE, alguns MB por variável.
 > As funções fazem cache em `data/` e pulam o que já existe.
+
+### Vitrine (frontend React)
+
+```bash
+cd web
+npm install
+npm run dev        # http://localhost:5173
+
+# Regerar o GeoJSON que o mapa consome (a partir da raiz do projeto):
+python scripts/montar_dados_web.py --demo
+```
+
+> Hoje a vitrine roda com **dados de demonstração** por UF (claramente sinalizado
+> na interface). Ao concluir o pipeline (M1/M2), o mesmo frontend passa a consumir
+> o GeoJSON **municipal real** — sem mudar o código do mapa. Deploy: Vercel (preset Vite, raiz `web/`).
 
 ---
 
@@ -128,10 +154,12 @@ Estratégia adotada (documentada no notebook):
 ## 🗂️ Roadmap
 
 - [x] **Scaffold + ingestão** — baixar as 3 fontes e casá-las por código IBGE.
+- [x] **Vitrine React** — mapa interativo (deck.gl + MapLibre) rodando com dados demo por UF.
 - [ ] **EDA + mapas de recurso** — coroplético de irradiação, sazonalidade, ranking.
 - [ ] **Cruzamento (o insight)** — GTI × potência per capita; índice de oportunidade.
+- [ ] **Dados reais na vitrine** — trocar o GeoJSON demo pelo municipal do pipeline.
 - [ ] **Storytelling** — pergunta → método → achados → conclusão, com mapas.
-- [ ] **(Opcional)** app Streamlit navegável (deploy no Streamlit Community Cloud).
+- [ ] **Deploy** — publicar a vitrine na Vercel e linkar no topo do README.
 
 ---
 

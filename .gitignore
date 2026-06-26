@@ -32,8 +32,13 @@ env/
 */.ipynb_checkpoints/*
 
 # ── Ferramentas / IDE ───────────────────────────────────────
+.claude/
 .vscode/
 .idea/
+
+# ── Node (frontend) — node_modules/dist tratados em web/.gitignore ──
+node_modules/
+dist/
 .DS_Store
 Thumbs.db
 .env
