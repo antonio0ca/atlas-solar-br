@@ -17,132 +17,156 @@ export function Painel({ dados, modo, setModo, tresD, setTresD, tema, setTema, s
   const cfg = MODOS.find((m) => m.id === modo)!;
   const feats = dados.features.map((f) => f.properties);
 
-  // Estatísticas nacionais (demo ou reais — sempre derivadas dos dados carregados).
   const stats = useMemo(() => {
     const potTotal = feats.reduce((s, p) => s + p.pot_instalada_mw, 0);
     const comGti = feats.filter((p) => p.gti_anual != null);
-    const gtiMax = comGti.reduce((a, p) => (p.gti_anual > a.gti_anual ? p : a), comGti[0]);
-    return { potTotal, gtiMax };
+    const gtiMax = comGti.reduce((a, p) => (p.gti_anual! > a.gti_anual! ? p : a), comGti[0]);
+    const nDesertos = feats.filter((p) => p.classe_oportunidade === "deserto de aproveitamento").length;
+    return { potTotal, gtiMax, nDesertos };
   }, [feats]);
 
-  // Top desertos de aproveitamento (alto recurso, baixo uso).
   const desertos = useMemo(
     () =>
       feats
         .filter((p) => p.classe_oportunidade === "deserto de aproveitamento")
-        .sort((a, b) => b.score_oportunidade - a.score_oportunidade)
+        .sort((a, b) => (b.score_oportunidade ?? 0) - (a.score_oportunidade ?? 0))
         .slice(0, 6),
     [feats]
   );
 
   return (
     <aside className="painel">
-      <header className="painel-head">
-        <div className="logo">☀️</div>
-        <div>
-          <h1>Atlas de Potencial Solar do Brasil</h1>
-          <p className="sub">Recurso disponível × aproveitamento real</p>
+      {/* Masthead editorial */}
+      <header className="masthead">
+        <div className="masthead-text">
+          <span className="eyebrow">Energia Solar &middot; Brasil</span>
+          <h1>
+            Atlas de Potencial <em>Solar</em>
+          </h1>
+          <p className="lede">
+            Onde o Brasil tem mais sol — e quão pouco esse potencial está sendo aproveitado.
+          </p>
         </div>
         <button
           className="ghost-btn"
           onClick={() => setTema(tema === "light" ? "dark" : "light")}
           title="Alternar tema claro/escuro"
+          aria-label="Alternar tema claro/escuro"
         >
           Tema
         </button>
       </header>
 
-      <p className="pergunta">
-        Onde o Brasil tem <strong>mais sol</strong> — e quão pouco esse potencial está
-        sendo <strong>aproveitado</strong>?
-      </p>
-
       {/* Seletor de modo */}
-      <div className="modos">
+      <div className="seg" role="tablist" aria-label="Camada do mapa">
         {MODOS.map((m) => (
           <button
             key={m.id}
-            className={m.id === modo ? "modo ativo" : "modo"}
+            role="tab"
+            aria-selected={m.id === modo}
+            className={m.id === modo ? "seg-btn ativo" : "seg-btn"}
             onClick={() => setModo(m.id)}
           >
             {m.titulo}
           </button>
         ))}
       </div>
-      <p className="modo-desc">{cfg.descricao}</p>
+
+      {/* Descrição do modo — serifa em itálico (editorial) */}
+      <p className="note-desc">{cfg.descricao}</p>
 
       {/* Legenda */}
       <div className="legenda">
         {cfg.legenda.map((l, i) => (
-          <div key={i} className="legenda-item">
+          <span key={i} className="legenda-item">
             <span className="swatch" style={{ background: rgbCss(l.cor) }} />
-            <span>{l.rotulo}</span>
-          </div>
+            {l.rotulo}
+          </span>
         ))}
-        {cfg.unidade && <span className="unidade">unidade: {cfg.unidade}</span>}
       </div>
+      {cfg.unidade && <span className="unidade">unidade · {cfg.unidade}</span>}
 
       <label className="toggle">
         <input type="checkbox" checked={tresD} onChange={(e) => setTresD(e.target.checked)} />
-        <span>Visão 3D — altura = uso per capita</span>
+        <span>Visão 3D — altura representa o uso per capita</span>
       </label>
 
-      {/* Achado / narrativa */}
-      <div className="achado">
-        <span className="achado-tag">o insight</span>
+      {/* Achado — pull-quote editorial */}
+      <blockquote className="achado">
+        <span className="eyebrow accent">O insight</span>
         <p>
-          O sol mais forte está no <strong>Nordeste e Centro-Oeste</strong>, mas a maior
-          parte da capacidade instalada está no <strong>Sul e Sudeste</strong>. O
-          descasamento entre os dois cria os <strong>desertos de aproveitamento</strong>.
+          O sol mais forte está no <em>Nordeste e Centro-Oeste</em>, mas a capacidade
+          instalada se concentra no <em>Sul e Sudeste</em>. Esse descasamento cria os
+          desertos de aproveitamento.
         </p>
-      </div>
+      </blockquote>
 
-      {/* Ranking de desertos */}
+      {/* Ranking — tabela no estilo do histórico */}
       {desertos.length > 0 && (
-        <div className="ranking">
-          <h2>
-            <span
-              className="dot"
-              style={{ background: rgbCss(CORES_CLASSE["deserto de aproveitamento"]) }}
-            />
+        <section className="ranking">
+          <span className="eyebrow">
+            <span className="dot" style={{ background: rgbCss(CORES_CLASSE["deserto de aproveitamento"]) }} />
             Desertos de aproveitamento
-          </h2>
-          <ul>
-            {desertos.map((p) => (
-              <li
-                key={p.code}
-                className={selecionado === p.code ? "sel" : ""}
-                onMouseEnter={() => onSelecionar(p.code)}
-              >
-                <span className="r-nome">{p.name}</span>
-                <span className="r-val">{p.gti_anual.toFixed(2)} kWh · {p.w_per_capita.toFixed(0)} W/hab</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          </span>
+          <table>
+            <thead>
+              <tr>
+                <th>Município</th>
+                <th className="num">GTI</th>
+                <th className="num">W/hab</th>
+              </tr>
+            </thead>
+            <tbody>
+              {desertos.map((p) => (
+                <tr
+                  key={p.code}
+                  className={selecionado === p.code ? "sel" : ""}
+                  onMouseEnter={() => onSelecionar(p.code)}
+                >
+                  <td>
+                    {p.name} <span className="uf">{p.uf}</span>
+                  </td>
+                  <td className="num">{p.gti_anual?.toFixed(2)}</td>
+                  <td className="num">{p.w_per_capita?.toFixed(0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
       )}
 
+      {/* Estatísticas */}
       <div className="stats">
-        <div>
-          <span className="stat-num">{(stats.potTotal / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}</span>
-          <span className="stat-lbl">GW FV instalados</span>
+        <div className="stat">
+          <span className="stat-label">FV instalada</span>
+          <span className="stat-value">
+            {(stats.potTotal / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+            <small> GW</small>
+          </span>
         </div>
-        <div>
-          <span className="stat-num">{stats.gtiMax.uf}</span>
-          <span className="stat-lbl">maior recurso ({stats.gtiMax.gti_anual.toFixed(2)})</span>
+        <div className="stat">
+          <span className="stat-label">Desertos</span>
+          <span className="stat-value">{stats.nDesertos.toLocaleString("pt-BR")}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Maior GTI</span>
+          <span className="stat-value">
+            {stats.gtiMax?.gti_anual?.toFixed(2)}
+            <small> {stats.gtiMax?.uf}</small>
+          </span>
         </div>
       </div>
 
       <footer className="painel-foot">
         {dados.meta?.fonte?.startsWith("DEMO") && (
-          <span className="badge-demo">⚠ dados de demonstração</span>
+          <span className="badge-demo">dados de demonstração</span>
         )}
         <p>
-          Fontes: <strong>LABREN/CCST/INPE</strong> (irradiação) · <strong>ANEEL</strong>{" "}
-          (geração distribuída) · <strong>IBGE</strong> (malhas/população).
+          Fontes: <b>LABREN/CCST/INPE</b> (irradiação) · <b>ANEEL</b> (geração distribuída) ·{" "}
+          <b>IBGE</b> (malhas/população).
         </p>
         <a href="https://github.com/antonio0ca/atlas-solar-br" target="_blank" rel="noreferrer">
-          ↗ código no GitHub
+          Código no GitHub →
         </a>
       </footer>
     </aside>
