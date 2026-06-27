@@ -178,6 +178,75 @@ body {
 .painel-foot a { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-weight: 600; }
 .painel-foot a:hover { text-decoration: underline; }
 
+/* Segmentado com 4 modos: aperta um pouco */
+.seg-btn { font-size: 0.66rem; padding: 9px 4px; letter-spacing: 0.03em; }
+
+/* Busca */
+.busca { position: relative; margin-bottom: 16px; }
+.busca input {
+  width: 100%; background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  padding: 9px 12px; border-radius: var(--radius); font-family: inherit; font-size: 0.85rem;
+}
+.busca input:focus { outline: none; border-color: var(--accent); }
+.busca-lista {
+  position: absolute; z-index: 30; width: 100%; margin-top: 4px; list-style: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--sombra); max-height: 244px; overflow-y: auto;
+}
+.busca-lista li {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding: 8px 12px; cursor: pointer; font-size: 0.85rem;
+}
+.busca-lista li:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.busca-lista .b-uf { color: var(--muted); font-size: 0.72rem; }
+
+/* Detalhe do município selecionado */
+.detalhe {
+  margin: 4px 0 24px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+.det-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.det-head h2 { font-size: 15px; font-weight: 700; margin: 0; }
+.det-head .uf { color: var(--muted); font-size: 0.74rem; font-weight: 500; }
+.ghost-btn.small { padding: 4px 10px; font-size: 0.62rem; }
+.det-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 10px; margin: 14px 0 12px; }
+.det-grid > div { display: flex; flex-direction: column; gap: 3px; }
+.det-l { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.det-v { font-family: "JetBrains Mono", monospace; font-size: 1.12rem; color: var(--ink); }
+.det-v.det-reg { font-family: "Inter", sans-serif; font-size: 0.92rem; }
+
+/* Sazonalidade */
+.sazonal { margin-top: 4px; }
+.saz-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.saz-amp { font-size: 0.7rem; color: var(--muted); }
+.saz-amp b { font-family: "JetBrains Mono", monospace; color: var(--ink); font-weight: 500; }
+.saz-svg { width: 100%; height: 66px; display: block; }
+.saz-area { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: none; }
+.saz-linha { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.saz-pt { fill: var(--accent); }
+.saz-meses { display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace; font-size: 0.6rem; color: var(--muted); margin-top: 3px; }
+.saz-vazio { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+/* Gap de aproveitamento */
+.gap {
+  margin: 0 0 26px; padding: 14px; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  border-radius: var(--radius); background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.gap p { margin-top: 8px; font-size: 0.92rem; line-height: 1.55; color: var(--ink); }
+.gap b { color: var(--ink); }
+.gap-num { color: var(--accent); font-family: "JetBrains Mono", monospace; font-size: 1.05rem; }
+
+/* Ranking por região */
+.reg { margin-bottom: 28px; }
+.reg table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+.reg thead th {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px 4px; text-align: left;
+}
+.reg th.num, .reg td.num { text-align: right; }
+.reg tbody td { padding: 7px 4px; border-bottom: 1px solid var(--line); }
+.reg-nota { font-size: 0.72rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
 /* ── Responsivo ───────────────────────────────────────── */
 @media (max-width: 720px) {
   .painel {

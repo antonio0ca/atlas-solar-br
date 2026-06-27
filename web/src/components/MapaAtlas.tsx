@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import Map, { useControl, NavigationControl } from "react-map-gl/maplibre";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Map, { useControl, NavigationControl, type MapRef } from "react-map-gl/maplibre";
 import { MapboxOverlay, type MapboxOverlayProps } from "@deck.gl/mapbox";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -43,13 +43,15 @@ interface Props {
   modo: Modo;
   tresD: boolean;
   tema: "light" | "dark";
+  alvo: { lng: number; lat: number } | null;
   selecionado: string | null;
   onSelecionar: (code: string | null) => void;
 }
 
-export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar }: Props) {
+export function MapaAtlas({ dados, modo, tresD, tema, alvo, selecionado, onSelecionar }: Props) {
   const [hover, setHover] = useState<{ x: number; y: number; p: AtlasProps } | null>(null);
   const [estilo, setEstilo] = useState<any>(null);
+  const mapaRef = useRef<MapRef>(null);
   const corLinha: [number, number, number] = tema === "light" ? [120, 113, 108] : [40, 42, 50];
 
   useEffect(() => {
@@ -59,6 +61,11 @@ export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar 
       vivo = false;
     };
   }, [tema]);
+
+  // Voa até o município buscado/selecionado pela barra de busca.
+  useEffect(() => {
+    if (alvo) mapaRef.current?.flyTo({ center: [alvo.lng, alvo.lat], zoom: 6.5, duration: 1200 });
+  }, [alvo]);
 
   const layer = useMemo(
     () =>
@@ -106,6 +113,7 @@ export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar 
       {estilo && (
       <Map
         key={tema}
+        ref={mapaRef}
         initialViewState={{ ...VISAO_INICIAL, pitch: tresD ? 45 : 0 }}
         mapStyle={estilo}
         attributionControl={false}
@@ -132,6 +140,12 @@ export function MapaAtlas({ dados, modo, tresD, tema, selecionado, onSelecionar 
               <dt>Potência instalada</dt>
               <dd>{hover.p.pot_instalada_mw.toLocaleString("pt-BR")} MW</dd>
             </div>
+            {hover.p.densidade_adocao != null && (
+              <div>
+                <dt>Adoção</dt>
+                <dd>{hover.p.densidade_adocao.toFixed(1)} usinas/mil hab</dd>
+              </div>
+            )}
           </dl>
           <span className="tt-classe">{hover.p.classe_oportunidade}</span>
         </div>

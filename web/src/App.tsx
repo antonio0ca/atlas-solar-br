@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapaAtlas } from "./components/MapaAtlas";
 import { Painel } from "./components/Painel";
-import { type AtlasFC, type Modo } from "./lib/atlas";
+import { type AtlasFC, type Modo, centroideBbox } from "./lib/atlas";
 
 type Tema = "light" | "dark";
 
@@ -12,10 +12,20 @@ export default function App() {
   const [tresD, setTresD] = useState(false);
   const [selecionado, setSelecionado] = useState<string | null>(null);
   const [tema, setTema] = useState<Tema>("light");
+  const [alvo, setAlvo] = useState<{ lng: number; lat: number } | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = tema;
   }, [tema]);
+
+  // Seleciona um município e voa o mapa até ele (usado pela busca e pelos rankings).
+  const irParaMunicipio = (code: string) => {
+    const f = dados?.features.find((x) => x.properties.code === code);
+    if (!f) return;
+    setSelecionado(code);
+    const c = centroideBbox(f.geometry);
+    if (c) setAlvo(c);
+  };
 
   useEffect(() => {
     // Carrega o nível municipal se existir; senão cai para o estadual (demo).
@@ -40,6 +50,7 @@ export default function App() {
         modo={modo}
         tresD={tresD}
         tema={tema}
+        alvo={alvo}
         selecionado={selecionado}
         onSelecionar={setSelecionado}
       />
@@ -53,6 +64,7 @@ export default function App() {
         setTema={setTema}
         selecionado={selecionado}
         onSelecionar={setSelecionado}
+        onIrPara={irParaMunicipio}
       />
     </div>
   );
