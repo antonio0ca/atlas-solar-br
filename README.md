@@ -12,9 +12,10 @@ O contraste entre as duas é a narrativa central: **regiões com muito sol e pou
 instalação são "desertos de aproveitamento"** (alto potencial, baixo uso).
 
 > **Vitrine interativa (React + deck.gl):** mapa navegável com modos
-> _Recurso_, _Uso_ e _Oportunidade_, visão 3D, tema **claro/escuro** (o basemap
-> acompanha) e realce dos desertos. Identidade visual sans-serif (Inter +
-> JetBrains Mono), acento teal. Código em [`web/`](web/). _(link da demo na Vercel em breve.)_
+> _Recurso_, _Uso_, _Oportunidade_ e _Adoção_, busca por município/UF, visão 3D,
+> tema **claro/escuro** (o basemap acompanha), sazonalidade mensal do recurso e
+> ranking por região. Identidade visual sans-serif (Inter + JetBrains Mono), acento
+> teal. Código em [`web/`](web/). _(link da demo na Vercel em breve.)_
 
 ---
 
@@ -170,9 +171,14 @@ Números do pipeline atual (INPE GTI + ANEEL GD + IBGE, jun/2026):
    **Morro Cabeça no Tempo/PI** e **Cônego Marinho/MG**) têm GTI próximo de 6,0 e **30 a 50 W/hab**.
 4. **O contraste capital versus interior.** Mesmo capitais ensolaradas têm baixo per
    capita por causa da população (por exemplo **São Paulo**, com GTI 4,6 e só **19 W/hab**).
+5. **O descasamento por região.** O **Nordeste** tem o maior recurso (GTI médio 5,44)
+   mas só 126 W/hab de mediana, e concentra **588 dos 671 desertos**. O **Sul** tem o
+   menor sol (4,77), 494 W/hab e **zero desertos**: adoção alta apesar do recurso menor.
+6. **O tamanho da oportunidade.** Se os 671 desertos chegassem à mediana nacional de uso
+   (250 W/hab), seriam cerca de **+3,1 GW** de solar instalada hoje inexistente.
 
-> Leitura preliminar a partir dos agregados. A EDA aprofundada (sazonalidade por
-> região, controle por renda) está no roadmap (M1/M2).
+> Leitura a partir dos agregados, já refletida na vitrine (modos Recurso, Uso,
+> Oportunidade e Adoção, sazonalidade mensal por município e ranking por região).
 
 ---
 
