@@ -7,10 +7,15 @@ export interface AtlasProps {
   code: string;
   name: string;
   uf: string;
+  regiao?: string; // macrorregião do IBGE
   level: "uf" | "mun";
-  gti_anual: number; // recurso — kWh/m².dia (plano inclinado)
-  pot_instalada_mw: number; // uso — potência FV instalada
-  w_per_capita: number; // uso — W/hab
+  gti_anual: number; // recurso: kWh/m².dia (plano inclinado)
+  gti_meses?: number[] | null; // 12 médias mensais de GTI (sazonalidade)
+  pot_instalada_mw: number; // uso: potência FV instalada
+  n_empreendimentos?: number; // adoção: nº de usinas de GD
+  densidade_adocao?: number | null; // adoção: empreendimentos por mil hab
+  populacao?: number | null;
+  w_per_capita: number; // uso: W/hab
   score_oportunidade: number; // percentil(recurso) - percentil(uso), -1..1
   classe_oportunidade: string;
 }
@@ -20,7 +25,7 @@ export type AtlasFC = GeoJSON.FeatureCollection<GeoJSON.Geometry, AtlasProps> & 
   meta?: { fonte?: string; nivel?: string };
 };
 
-export type Modo = "recurso" | "uso" | "oportunidade";
+export type Modo = "recurso" | "uso" | "oportunidade" | "adocao";
 
 // ── Interpolação linear em uma rampa de cores ───────────────────────────────
 function lerp(a: number, b: number, t: number): number {
@@ -53,6 +58,14 @@ const RAMPA_USO: RGB[] = [
   [13, 148, 136],
   [11, 110, 102],
 ];
+// Rampa "adoção" (índigo sequencial) — densidade de empreendimentos.
+const RAMPA_ADOCAO: RGB[] = [
+  [231, 230, 250],
+  [179, 178, 240],
+  [129, 130, 232],
+  [99, 102, 241],
+  [67, 56, 170],
+];
 
 // Cores categóricas do modo oportunidade (a narrativa) — palette do Visualizador.
 export const CORES_CLASSE: Record<string, RGB> = {
@@ -65,8 +78,10 @@ export const CORES_CLASSE: Record<string, RGB> = {
 
 // Domínios das rampas (calibrados aos dados reais; p5–p95 do GTI municipal).
 const DOM_RECURSO: [number, number] = [4.4, 6.0];
-// Uso: log10(W/hab) — distribuição muito assimétrica (mediana ~250, cauda até ~9700).
+// Uso: log10(W/hab), distribuição muito assimétrica (mediana ~250, cauda até ~9700).
 const DOM_USO_LOG: [number, number] = [1.3, 3.48]; // ~20 a ~3000 W/hab
+// Adoção: log10(empreendimentos por mil hab).
+const DOM_ADOCAO_LOG: [number, number] = [0, 1.9]; // ~0 a ~80 por mil hab
 
 function norm(v: number, [lo, hi]: [number, number]): number {
   return (v - lo) / (hi - lo);
@@ -80,6 +95,10 @@ export function corDaFeature(p: AtlasProps, modo: Modo): RGB {
   if (modo === "uso") {
     if (p.w_per_capita == null) return CORES_CLASSE["sem dado"];
     return rampa(RAMPA_USO, norm(Math.log10(p.w_per_capita + 1), DOM_USO_LOG));
+  }
+  if (modo === "adocao") {
+    if (p.densidade_adocao == null) return CORES_CLASSE["sem dado"];
+    return rampa(RAMPA_ADOCAO, norm(Math.log10(p.densidade_adocao + 1), DOM_ADOCAO_LOG));
   }
   return CORES_CLASSE[p.classe_oportunidade] ?? CORES_CLASSE["sem dado"];
 }
@@ -98,7 +117,7 @@ export const MODOS: ConfigModo[] = [
   {
     id: "recurso",
     titulo: "Recurso",
-    descricao: "Irradiação no plano inclinado (GTI) — quanto sol cada lugar recebe.",
+    descricao: "Irradiação no plano inclinado (GTI): quanto sol cada lugar recebe.",
     unidade: "kWh/m²·dia",
     campo: "gti_anual",
     legenda: [
@@ -123,7 +142,7 @@ export const MODOS: ConfigModo[] = [
   {
     id: "oportunidade",
     titulo: "Oportunidade",
-    descricao: "Cruzamento recurso × uso. Destaque: muito sol e pouca instalação.",
+    descricao: "Cruzamento recurso vs uso. Destaque: muito sol e pouca instalação.",
     unidade: "",
     campo: "score_oportunidade",
     legenda: [
@@ -133,6 +152,78 @@ export const MODOS: ConfigModo[] = [
       { cor: CORES_CLASSE["intermediário"], rotulo: "Intermediário" },
     ],
   },
+  {
+    id: "adocao",
+    titulo: "Adoção",
+    descricao: "Densidade de usinas: empreendimentos de GD por mil habitantes.",
+    unidade: "usinas/mil hab",
+    campo: "densidade_adocao",
+    legenda: [
+      { cor: rampa(RAMPA_ADOCAO, 1), rotulo: "Muita adoção" },
+      { cor: rampa(RAMPA_ADOCAO, 0.5), rotulo: "" },
+      { cor: rampa(RAMPA_ADOCAO, 0), rotulo: "Pouca adoção" },
+    ],
+  },
 ];
 
 export const rgbCss = (c: RGB, a = 1) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+
+// ── Insights agregados ──────────────────────────────────────────────────────
+const mediana = (arr: number[]): number => {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)];
+};
+
+export interface Gap {
+  gw: number; // capacidade FV (GW) que faltaria nos desertos para alcançar a mediana
+  nDesertos: number;
+  medianaWpc: number; // mediana nacional de W/hab
+}
+
+// Quanto de FV faltaria instalar para os desertos chegarem à mediana nacional de W/hab.
+export function calcularGap(feats: AtlasProps[]): Gap {
+  const wpcs = feats.filter((p) => p.w_per_capita != null).map((p) => p.w_per_capita);
+  const medianaWpc = mediana(wpcs);
+  let kw = 0;
+  let n = 0;
+  for (const p of feats) {
+    if (p.classe_oportunidade !== "deserto de aproveitamento") continue;
+    if (!p.populacao || p.w_per_capita == null) continue;
+    const faltaW = (medianaWpc - p.w_per_capita) * p.populacao; // W
+    if (faltaW > 0) {
+      kw += faltaW / 1000;
+      n++;
+    }
+  }
+  return { gw: kw / 1e6, nDesertos: n, medianaWpc };
+}
+
+export interface ResumoRegiao {
+  regiao: string;
+  nMunicipios: number;
+  gtiMedio: number;
+  wpcMediano: number;
+  potGW: number;
+  nDesertos: number;
+}
+
+const ORDEM_REGIAO = ["Nordeste", "Centro-Oeste", "Sudeste", "Sul", "Norte"];
+
+export function agregarPorRegiao(feats: AtlasProps[]): ResumoRegiao[] {
+  const grupos: Record<string, AtlasProps[]> = {};
+  for (const p of feats) {
+    if (!p.regiao) continue;
+    (grupos[p.regiao] ||= []).push(p);
+  }
+  return Object.entries(grupos)
+    .map(([regiao, ps]) => ({
+      regiao,
+      nMunicipios: ps.length,
+      gtiMedio: ps.reduce((s, p) => s + (p.gti_anual || 0), 0) / ps.length,
+      wpcMediano: mediana(ps.filter((p) => p.w_per_capita != null).map((p) => p.w_per_capita)),
+      potGW: ps.reduce((s, p) => s + p.pot_instalada_mw, 0) / 1000,
+      nDesertos: ps.filter((p) => p.classe_oportunidade === "deserto de aproveitamento").length,
+    }))
+    .sort((a, b) => ORDEM_REGIAO.indexOf(a.regiao) - ORDEM_REGIAO.indexOf(b.regiao));
+}
