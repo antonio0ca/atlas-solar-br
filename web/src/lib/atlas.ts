@@ -168,6 +168,23 @@ export const MODOS: ConfigModo[] = [
 
 export const rgbCss = (c: RGB, a = 1) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
 
+// Centro do bounding box de uma geometria (para "voar" o mapa até o município).
+export function centroideBbox(geom: GeoJSON.Geometry): { lng: number; lat: number } | null {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const visitar = (coords: any) => {
+    if (typeof coords[0] === "number") {
+      minX = Math.min(minX, coords[0]); maxX = Math.max(maxX, coords[0]);
+      minY = Math.min(minY, coords[1]); maxY = Math.max(maxY, coords[1]);
+    } else {
+      for (const c of coords) visitar(c);
+    }
+  };
+  if (!("coordinates" in geom)) return null;
+  visitar((geom as any).coordinates);
+  if (!isFinite(minX)) return null;
+  return { lng: (minX + maxX) / 2, lat: (minY + maxY) / 2 };
+}
+
 // ── Insights agregados ──────────────────────────────────────────────────────
 const mediana = (arr: number[]): number => {
   if (!arr.length) return 0;
