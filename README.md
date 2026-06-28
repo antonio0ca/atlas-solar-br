@@ -2,6 +2,8 @@
 
 > Onde o Brasil tem mais sol, e quão pouco desse potencial está sendo aproveitado?
 
+**Demo ao vivo:** https://antonio0ca.github.io/atlas-solar-br/
+
 Projeto de **análise de dados geoespacial** que cruza duas camadas para revelar
 **oportunidades desperdiçadas** de energia solar no Brasil:
 
@@ -15,7 +17,7 @@ instalação são "desertos de aproveitamento"** (alto potencial, baixo uso).
 > _Recurso_, _Uso_, _Oportunidade_ e _Adoção_, busca por município/UF, visão 3D,
 > tema **claro/escuro** (o basemap acompanha), sazonalidade mensal do recurso e
 > ranking por região. Identidade visual sans-serif (Inter + JetBrains Mono), acento
-> teal. Código em [`web/`](web/). _(link da demo na Vercel em breve.)_
+> teal. Hospedada no GitHub Pages; código em [`web/`](web/).
 
 ---
 
@@ -127,7 +129,8 @@ python scripts/montar_dados_web.py --real     # monta atlas_municipios.geojson
 
 > O frontend é **agnóstico ao nível**: se `atlas_municipios.geojson` não existir,
 > ele cai para `atlas_uf.geojson` (demo por UF, sinalizado na interface).
-> Deploy: Vercel (preset Vite, raiz `web/`).
+> Deploy: GitHub Pages via Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)),
+> com `base` `/atlas-solar-br/`.
 
 ---
 
@@ -190,7 +193,7 @@ Números do pipeline atual (INPE GTI + ANEEL GD + IBGE, jun/2026):
 - [ ] **EDA e mapas de recurso:** sazonalidade por região, ranking, controle por renda.
 - [ ] **Cruzamento aprofundado:** correlação recurso e uso versus renda (hipótese H4).
 - [ ] **Storytelling:** pergunta, método, achados e conclusão, com mapas.
-- [ ] **Deploy:** publicar a vitrine na Vercel e linkar no topo do README.
+- [x] **Deploy:** vitrine publicada no GitHub Pages (via Actions) e linkada no topo.
 
 ---
 
